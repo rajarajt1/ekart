@@ -1,0 +1,61 @@
+# ==========================================
+# Node Modules - NEVER push these
+# ==========================================
+node_modules/
+*/node_modules/
+**/node_modules/
+server/node_modules/
+client/node_modules/
+
+# ==========================================
+# Environment Files - Has Secret Keys
+# ==========================================
+.env
+.env.local
+.env.development
+.env.production
+*/.env
+server/.env
+client/.env
+
+# ==========================================
+# Build Files
+# ==========================================
+dist/
+build/
+client/dist/
+*/dist/
+
+# ==========================================
+# Logs
+# ==========================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# ==========================================
+# OS Files
+# ==========================================
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# VS Code
+# ==========================================
+.vscode/
+*.code-workspace
+
+# ==========================================
+# Cache
+# ==========================================
+.npm
+.cache
+.eslintcache
+
+# ==========================================
+# Package lock (optional - you can remove this)
+# ==========================================
+# package-lock.json
