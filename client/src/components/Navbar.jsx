@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+﻿import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 
@@ -13,127 +13,81 @@ const Navbar = () => {
   };
 
   return (
-    <nav style={styles.navbar}>
-      {/* Logo */}
-      <Link to="/" style={styles.logo}>
-        🛒 cholaKart
-      </Link>
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-gray-900 via-slate-800 to-gray-900 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-xl font-bold text-rose-500 hover:text-rose-400 transition-colors"
+            style={{ textDecoration: "none" }}
+          >
+            <span className="text-2xl">🛒</span>
+            <span>cholaKart</span>
+          </Link>
 
-      {/* Right Side */}
-      <div style={styles.navRight}>
-        {/* Cart Icon */}
-        <Link to="/cart" style={styles.cartBtn}>
-          🛒 Cart
-          {cartCount > 0 && (
-            <span style={styles.cartBadge}>{cartCount}</span>
-          )}
-        </Link>
-
-        {user ? (
-          <>
-            {/* My Orders */}
-            <Link to="/my-orders" style={styles.navLink}>
-              📦 My Orders
+          {/* Right Side */}
+          <div className="flex items-center gap-3">
+            {/* Cart */}
+            <Link
+              to="/cart"
+              className="relative flex items-center gap-1.5 bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium px-4 py-2 rounded-full transition-all"
+              style={{ textDecoration: "none" }}
+            >
+              <span>🛒</span>
+              <span>Cart</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-amber-400 text-gray-900 text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </Link>
 
-            {/* User Name */}
-            <span style={styles.userName}>Hello, {user.name}</span>
-
-            {/* Logout */}
-            <button onClick={handleLogout} style={styles.logoutBtn}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" style={styles.navLink}>
-              Login
-            </Link>
-            <Link to="/register" style={styles.registerBtn}>
-              Register
-            </Link>
-          </>
-        )}
+            {user ? (
+              <>
+                <Link
+                  to="/my-orders"
+                  className="text-gray-300 hover:text-white text-sm font-medium transition-colors hidden sm:block"
+                  style={{ textDecoration: "none" }}
+                >
+                  📦 My Orders
+                </Link>
+                <span className="text-gray-400 text-sm hidden md:block">
+                  Hi,{" "}
+                  <span className="text-white font-medium">
+                    {user.name.split(" ")[0]}
+                  </span>
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="text-rose-400 border border-rose-500 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-all cursor-pointer bg-transparent"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
+                  style={{ textDecoration: "none" }}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition-all"
+                  style={{ textDecoration: "none" }}
+                >
+                  Register
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </nav>
   );
-};
-
-// Styles
-const styles = {
-  navbar: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "15px 30px",
-    background: "linear-gradient(135deg, #1a1a2e, #16213e)",
-    color: "white",
-    position: "sticky",
-    top: 0,
-    zIndex: 100,
-    boxShadow: "0 2px 10px rgba(0,0,0,0.3)",
-  },
-  logo: {
-    fontSize: "1.5rem",
-    fontWeight: "bold",
-    color: "#e94560",
-    textDecoration: "none",
-  },
-  navRight: {
-    display: "flex",
-    alignItems: "center",
-    gap: "15px",
-  },
-  navLink: {
-    color: "white",
-    textDecoration: "none",
-    fontSize: "0.95rem",
-  },
-  cartBtn: {
-    position: "relative",
-    color: "white",
-    textDecoration: "none",
-    fontSize: "0.95rem",
-    background: "#e94560",
-    padding: "8px 16px",
-    borderRadius: "20px",
-  },
-  cartBadge: {
-    position: "absolute",
-    top: "-8px",
-    right: "-8px",
-    background: "#ff9800",
-    color: "white",
-    borderRadius: "50%",
-    width: "20px",
-    height: "20px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "0.7rem",
-    fontWeight: "bold",
-  },
-  userName: {
-    color: "#aaa",
-    fontSize: "0.9rem",
-  },
-  logoutBtn: {
-    background: "transparent",
-    border: "1px solid #e94560",
-    color: "#e94560",
-    padding: "6px 14px",
-    borderRadius: "5px",
-    cursor: "pointer",
-    fontSize: "0.9rem",
-  },
-  registerBtn: {
-    background: "#e94560",
-    color: "white",
-    padding: "8px 16px",
-    borderRadius: "5px",
-    textDecoration: "none",
-    fontSize: "0.9rem",
-  },
 };
 
 export default Navbar;

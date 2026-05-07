@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
@@ -10,11 +10,10 @@ const CheckoutPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState(1); // Step 1: Shipping, Step 2: Payment
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Shipping Form State
   const [shipping, setShipping] = useState({
     address: "",
     city: "",
@@ -22,27 +21,21 @@ const CheckoutPage = () => {
     pinCode: "",
   });
 
-  // Payment Method State
   const [paymentMethod, setPaymentMethod] = useState("COD");
 
-  // Redirect if not logged in
   if (!user) {
     navigate("/login");
     return null;
   }
 
-  // Redirect if cart is empty
   if (cartItems.length === 0) {
     navigate("/");
     return null;
   }
 
-  // Calculations
   const taxPrice = Number((cartTotal * 0.18).toFixed(2));
   const shippingPrice = cartTotal > 500 ? 0 : 50;
-  const totalPrice = Number(
-    (cartTotal + taxPrice + shippingPrice).toFixed(2)
-  );
+  const totalPrice = Number((cartTotal + taxPrice + shippingPrice).toFixed(2));
 
   const handleShippingChange = (e) => {
     setShipping({ ...shipping, [e.target.name]: e.target.value });
@@ -50,12 +43,7 @@ const CheckoutPage = () => {
 
   const handleShippingSubmit = (e) => {
     e.preventDefault();
-    if (
-      !shipping.address ||
-      !shipping.city ||
-      !shipping.state ||
-      !shipping.pinCode
-    ) {
+    if (!shipping.address || !shipping.city || !shipping.state || !shipping.pinCode) {
       setError("Please fill all shipping fields");
       return;
     }
@@ -63,11 +51,9 @@ const CheckoutPage = () => {
     setStep(2);
   };
 
-  // Place Order
   const handlePlaceOrder = async () => {
     setLoading(true);
     setError("");
-
     try {
       const orderData = {
         orderItems: cartItems.map((item) => ({
@@ -84,9 +70,7 @@ const CheckoutPage = () => {
         shippingPrice,
         totalPrice,
       };
-
-      const { data } = await axiosInstance.post("/orders", orderData);
-
+      await axiosInstance.post("/orders", orderData);
       clearCart();
       navigate("/my-orders");
     } catch (err) {
@@ -96,103 +80,106 @@ const CheckoutPage = () => {
     }
   };
 
+  const paymentOptions = [
+    { value: "COD", label: "Cash on Delivery", icon: "💵" },
+    { value: "UPI", label: "UPI Payment", icon: "📱" },
+    { value: "Card", label: "Credit / Debit Card", icon: "💳" },
+    { value: "NetBanking", label: "Net Banking", icon: "🏦" },
+  ];
+
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div style={styles.container}>
-        <h2 style={styles.title}>Checkout</h2>
+      <div className="max-w-5xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">Checkout</h2>
 
         {/* Step Indicator */}
-        <div style={styles.stepRow}>
-          <div style={{
-            ...styles.step,
-            background: step >= 1 ? "#e94560" : "#ddd",
-            color: step >= 1 ? "white" : "#888",
-          }}>
-            1. Shipping Address
+        <div className="flex items-center mb-8">
+          <div className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold ${step >= 1 ? "bg-rose-600 text-white" : "bg-gray-200 text-gray-500"}`}>
+            <span className="w-6 h-6 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-xs font-bold">1</span>
+            Shipping
           </div>
-          <div style={styles.stepLine} />
-          <div style={{
-            ...styles.step,
-            background: step >= 2 ? "#e94560" : "#ddd",
-            color: step >= 2 ? "white" : "#888",
-          }}>
-            2. Payment
+          <div className={`flex-1 h-1 mx-2 rounded-full ${step >= 2 ? "bg-rose-400" : "bg-gray-200"}`} />
+          <div className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold ${step >= 2 ? "bg-rose-600 text-white" : "bg-gray-200 text-gray-500"}`}>
+            <span className="w-6 h-6 rounded-full bg-white bg-opacity-30 flex items-center justify-center text-xs font-bold">2</span>
+            Payment
           </div>
         </div>
 
-        <div style={styles.checkoutLayout}>
+        <div className="flex flex-col lg:flex-row gap-6 items-start">
           {/* Left: Form */}
-          <div style={styles.formBox}>
-
+          <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
             {/* STEP 1: Shipping */}
             {step === 1 && (
               <div>
-                <h3 style={styles.sectionTitle}>
-                  📦 Shipping Address
-                </h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-5">📦 Shipping Address</h3>
+
                 {error && (
-                  <p style={{ color: "red", marginBottom: "10px" }}>
-                    {error}
-                  </p>
+                  <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg mb-5">
+                    ⚠️ {error}
+                  </div>
                 )}
-                <form onSubmit={handleShippingSubmit}>
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>Street Address</label>
+
+                <form onSubmit={handleShippingSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Street Address</label>
                     <input
                       type="text"
                       name="address"
                       value={shipping.address}
                       onChange={handleShippingChange}
                       placeholder="Enter your street address"
-                      style={styles.input}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors"
                       required
                     />
                   </div>
 
-                  <div style={styles.formRow}>
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>City</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">City</label>
                       <input
                         type="text"
                         name="city"
                         value={shipping.city}
                         onChange={handleShippingChange}
                         placeholder="City"
-                        style={styles.input}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors"
                         required
                       />
                     </div>
-                    <div style={styles.formGroup}>
-                      <label style={styles.label}>State</label>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">State</label>
                       <input
                         type="text"
                         name="state"
                         value={shipping.state}
                         onChange={handleShippingChange}
                         placeholder="State"
-                        style={styles.input}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors"
                         required
                       />
                     </div>
                   </div>
 
-                  <div style={styles.formGroup}>
-                    <label style={styles.label}>PIN Code</label>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">PIN Code</label>
                     <input
                       type="text"
                       name="pinCode"
                       value={shipping.pinCode}
                       onChange={handleShippingChange}
                       placeholder="6-digit PIN code"
-                      style={styles.input}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:border-rose-500 transition-colors"
                       maxLength={6}
                       required
                     />
                   </div>
 
-                  <button type="submit" style={styles.nextBtn}>
+                  <button
+                    type="submit"
+                    className="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3.5 rounded-xl transition-all mt-2 border-none cursor-pointer text-sm"
+                  >
                     Continue to Payment →
                   </button>
                 </form>
@@ -202,314 +189,121 @@ const CheckoutPage = () => {
             {/* STEP 2: Payment */}
             {step === 2 && (
               <div>
-                <h3 style={styles.sectionTitle}>💳 Payment Method</h3>
+                <h3 className="text-lg font-bold text-gray-800 mb-5">💳 Payment Method</h3>
 
-                {/* Shipping Summary */}
-                <div style={styles.shippingSummary}>
-                  <p style={{ fontWeight: "600", marginBottom: "5px" }}>
-                    📦 Delivering to:
-                  </p>
-                  <p style={{ color: "#555" }}>
-                    {shipping.address}, {shipping.city},{" "}
-                    {shipping.state} - {shipping.pinCode}
+                {/* Address Summary */}
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-6">
+                  <p className="font-semibold text-gray-700 text-sm mb-1">📦 Delivering to:</p>
+                  <p className="text-gray-600 text-sm">
+                    {shipping.address}, {shipping.city}, {shipping.state} – {shipping.pinCode}
                   </p>
                   <button
-                    style={styles.editBtn}
                     onClick={() => setStep(1)}
+                    className="text-rose-600 text-xs font-semibold mt-2 hover:underline bg-transparent border-none cursor-pointer p-0"
                   >
-                    Edit Address
+                    ✏️ Edit Address
                   </button>
                 </div>
 
                 {/* Payment Options */}
-                <div style={styles.paymentOptions}>
-                  {["COD", "UPI", "Card", "NetBanking"].map((method) => (
-                    <label key={method} style={styles.paymentOption}>
+                <div className="space-y-3 mb-6">
+                  {paymentOptions.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-all ${
+                        paymentMethod === opt.value
+                          ? "border-rose-500 bg-rose-50"
+                          : "border-gray-200 hover:border-rose-200"
+                      }`}
+                    >
                       <input
                         type="radio"
                         name="paymentMethod"
-                        value={method}
-                        checked={paymentMethod === method}
+                        value={opt.value}
+                        checked={paymentMethod === opt.value}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        style={{ marginRight: "10px" }}
+                        className="accent-rose-600"
                       />
-                      {method === "COD" && "💵 Cash on Delivery"}
-                      {method === "UPI" && "📱 UPI Payment"}
-                      {method === "Card" && "💳 Credit/Debit Card"}
-                      {method === "NetBanking" && "🏦 Net Banking"}
+                      <span className="text-xl">{opt.icon}</span>
+                      <span className="font-medium text-gray-700 text-sm">{opt.label}</span>
                     </label>
                   ))}
                 </div>
 
                 {error && (
-                  <p style={{ color: "red", marginBottom: "10px" }}>
-                    {error}
-                  </p>
+                  <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg mb-4">
+                    ⚠️ {error}
+                  </div>
                 )}
 
-                {/* Place Order Button */}
                 <button
-                  style={{
-                    ...styles.placeOrderBtn,
-                    opacity: loading ? 0.7 : 1,
-                  }}
                   onClick={handlePlaceOrder}
                   disabled={loading}
+                  className="w-full bg-rose-600 hover:bg-rose-700 disabled:bg-rose-300 text-white font-bold py-4 rounded-xl transition-all border-none cursor-pointer text-sm"
                 >
-                  {loading
-                    ? "Placing Order..."
-                    : `🛍️ Place Order • ₹${totalPrice}`}
-                </button>
-
-                <button
-                  style={styles.backStepBtn}
-                  onClick={() => setStep(1)}
-                >
-                  ← Back to Shipping
+                  {loading ? "Placing Order..." : "🎉 Place Order"}
                 </button>
               </div>
             )}
           </div>
 
           {/* Right: Order Summary */}
-          <div style={styles.summary}>
-            <h3 style={styles.summaryTitle}>📋 Order Summary</h3>
+          <div className="w-full lg:w-80 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:sticky lg:top-24">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">Order Summary</h3>
 
-            {/* Items List */}
-            {cartItems.map((item) => (
-              <div key={item._id} style={styles.summaryItem}>
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  style={styles.summaryImg}
-                />
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: "0.85rem", fontWeight: "600" }}>
-                    {item.name}
-                  </p>
-                  <p style={{ fontSize: "0.8rem", color: "#888" }}>
-                    Qty: {item.qty}
+            {/* Items */}
+            <div className="space-y-3 mb-4 max-h-48 overflow-y-auto">
+              {cartItems.map((item) => (
+                <div key={item._id} className="flex items-center gap-3">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                    onError={(e) => { e.target.src = "https://via.placeholder.com/50?text=Img"; }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-gray-700 truncate">{item.name}</p>
+                    <p className="text-xs text-gray-400">Qty: {item.qty}</p>
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800 flex-shrink-0">
+                    ₹{(item.price * item.qty).toLocaleString("en-IN")}
                   </p>
                 </div>
-                <p style={{ fontWeight: "600", color: "#e94560" }}>
-                  ₹{(item.price * item.qty).toFixed(2)}
-                </p>
+              ))}
+            </div>
+
+            <div className="border-t border-gray-100 pt-4 space-y-2 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span>Subtotal</span>
+                <span>₹{cartTotal.toFixed(2)}</span>
               </div>
-            ))}
-
-            <div style={styles.divider} />
-
-            <div style={styles.priceRow}>
-              <span>Subtotal</span>
-              <span>₹{cartTotal.toFixed(2)}</span>
-            </div>
-            <div style={styles.priceRow}>
-              <span>Tax (18%)</span>
-              <span>₹{taxPrice}</span>
-            </div>
-            <div style={styles.priceRow}>
-              <span>Shipping</span>
-              <span style={{ color: shippingPrice === 0 ? "green" : "inherit" }}>
-                {shippingPrice === 0 ? "FREE" : `₹${shippingPrice}`}
-              </span>
+              <div className="flex justify-between text-gray-600">
+                <span>Tax (18%)</span>
+                <span>₹{taxPrice}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Shipping</span>
+                <span className={shippingPrice === 0 ? "text-green-600 font-medium" : ""}>
+                  {shippingPrice === 0 ? "FREE" : `₹${shippingPrice}`}
+                </span>
+              </div>
             </div>
 
-            <div style={styles.divider} />
-
-            <div style={{ ...styles.priceRow, fontWeight: "bold", fontSize: "1.1rem" }}>
-              <span>Total</span>
-              <span style={{ color: "#e94560" }}>₹{totalPrice}</span>
+            <div className="border-t border-gray-100 mt-3 pt-3 flex justify-between items-center">
+              <span className="font-bold text-gray-800">Total</span>
+              <span className="font-bold text-xl text-rose-600">₹{totalPrice}</span>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 text-center py-8 mt-12">
+        <p className="text-lg font-bold text-white mb-1">🛒 cholaKart</p>
+        <p className="text-sm">Built with ❤️ using MongoDB + Express + React + Node.js</p>
+      </footer>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: "1100px",
-    margin: "0 auto",
-    padding: "30px 20px",
-  },
-  title: {
-    fontSize: "1.8rem",
-    color: "#333",
-    marginBottom: "25px",
-  },
-  stepRow: {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: "30px",
-    gap: "10px",
-  },
-  step: {
-    padding: "10px 20px",
-    borderRadius: "25px",
-    fontWeight: "600",
-    fontSize: "0.9rem",
-    transition: "all 0.3s",
-  },
-  stepLine: {
-    flex: 1,
-    height: "2px",
-    background: "#ddd",
-  },
-  checkoutLayout: {
-    display: "flex",
-    gap: "25px",
-    alignItems: "flex-start",
-    flexWrap: "wrap",
-  },
-  formBox: {
-    flex: 2,
-    minWidth: "300px",
-    background: "white",
-    borderRadius: "15px",
-    padding: "25px",
-    boxShadow: "0 3px 15px rgba(0,0,0,0.08)",
-  },
-  sectionTitle: {
-    fontSize: "1.2rem",
-    color: "#333",
-    marginBottom: "20px",
-    paddingBottom: "10px",
-    borderBottom: "1px solid #eee",
-  },
-  formGroup: {
-    marginBottom: "15px",
-    flex: 1,
-  },
-  formRow: {
-    display: "flex",
-    gap: "15px",
-  },
-  label: {
-    display: "block",
-    fontSize: "0.85rem",
-    fontWeight: "600",
-    color: "#555",
-    marginBottom: "5px",
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    border: "2px solid #e1e5eb",
-    borderRadius: "8px",
-    fontSize: "0.95rem",
-    outline: "none",
-    boxSizing: "border-box",
-  },
-  nextBtn: {
-    width: "100%",
-    padding: "14px",
-    background: "#e94560",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: "600",
-    marginTop: "10px",
-  },
-  shippingSummary: {
-    background: "#f9f9f9",
-    borderRadius: "8px",
-    padding: "15px",
-    marginBottom: "20px",
-    border: "1px solid #eee",
-  },
-  editBtn: {
-    background: "none",
-    border: "none",
-    color: "#e94560",
-    cursor: "pointer",
-    fontSize: "0.85rem",
-    fontWeight: "600",
-    marginTop: "5px",
-    padding: 0,
-  },
-  paymentOptions: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-    marginBottom: "25px",
-  },
-  paymentOption: {
-    display: "flex",
-    alignItems: "center",
-    padding: "14px",
-    border: "2px solid #eee",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "0.95rem",
-    fontWeight: "500",
-  },
-  placeOrderBtn: {
-    width: "100%",
-    padding: "15px",
-    background: "#e94560",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "1.05rem",
-    fontWeight: "700",
-    marginBottom: "10px",
-  },
-  backStepBtn: {
-    width: "100%",
-    padding: "12px",
-    background: "transparent",
-    color: "#e94560",
-    border: "2px solid #e94560",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "0.95rem",
-    fontWeight: "600",
-  },
-  summary: {
-    flex: 1,
-    minWidth: "280px",
-    background: "white",
-    borderRadius: "15px",
-    padding: "25px",
-    boxShadow: "0 3px 15px rgba(0,0,0,0.08)",
-    position: "sticky",
-    top: "80px",
-  },
-  summaryTitle: {
-    fontSize: "1.1rem",
-    color: "#333",
-    marginBottom: "15px",
-    paddingBottom: "10px",
-    borderBottom: "1px solid #eee",
-  },
-  summaryItem: {
-    display: "flex",
-    gap: "10px",
-    alignItems: "center",
-    marginBottom: "12px",
-  },
-  summaryImg: {
-    width: "50px",
-    height: "50px",
-    objectFit: "cover",
-    borderRadius: "6px",
-    flexShrink: 0,
-  },
-  divider: {
-    borderTop: "1px solid #eee",
-    margin: "15px 0",
-  },
-  priceRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: "8px",
-    color: "#555",
-    fontSize: "0.9rem",
-  },
 };
 
 export default CheckoutPage;

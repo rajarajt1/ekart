@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../api/axiosInstance";
 import { useCart } from "../context/CartContext";
@@ -37,260 +37,213 @@ const ProductDetailPage = () => {
     setTimeout(() => setAdded(false), 2000);
   };
 
+  const renderStars = (rating) => {
+    const full = Math.floor(rating);
+    const empty = 5 - full;
+    return "★".repeat(full) + "☆".repeat(empty);
+  };
+
   if (loading) {
     return (
-      <div>
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <p style={{ textAlign: "center", padding: "50px" }}>
-          Loading product...
-        </p>
+        <div className="flex flex-col items-center justify-center py-32">
+          <div className="animate-spin rounded-full h-14 w-14 border-4 border-rose-500 border-t-transparent mb-4" />
+          <p className="text-gray-400 font-medium">Loading product...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !product) {
     return (
-      <div>
+      <div className="min-h-screen bg-gray-50">
         <Navbar />
-        <p style={{ textAlign: "center", padding: "50px", color: "red" }}>
-          {error}
-        </p>
+        <div className="text-center py-32">
+          <p className="text-5xl mb-4">😞</p>
+          <p className="text-red-500 font-semibold text-lg">{error || "Product not found"}</p>
+          <button
+            onClick={() => navigate("/")}
+            className="mt-4 bg-rose-600 text-white px-6 py-2 rounded-xl hover:bg-rose-700 transition-all border-none cursor-pointer"
+          >
+            Back to Shop
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div style={styles.container}>
-        {/* Back Button */}
-        <button style={styles.backBtn} onClick={() => navigate(-1)}>
-          ← Back
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Breadcrumb / Back */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-rose-600 hover:text-rose-700 font-medium text-sm mb-6 bg-transparent border-none cursor-pointer p-0"
+        >
+          ← Back to Products
         </button>
 
-        <div style={styles.productBox}>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10 flex flex-col md:flex-row gap-10">
           {/* Left: Image */}
-          <div style={styles.imageBox}>
-            <img
-              src={product.image}
-              alt={product.name}
-              style={styles.image}
-            />
+          <div className="flex-1 min-w-0">
+            <div className="relative rounded-xl overflow-hidden bg-gray-50">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full max-h-96 object-contain"
+                onError={(e) => {
+                  e.target.src = "https://via.placeholder.com/400x300?text=No+Image";
+                }}
+              />
+              {product.stock === 0 && (
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-xl">
+                  <span className="bg-red-500 text-white px-5 py-2 rounded-full font-bold">
+                    Out of Stock
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right: Details */}
-          <div style={styles.details}>
-            <h2 style={styles.productName}>{product.name}</h2>
+          <div className="flex-1 min-w-0">
+            {/* Category & Brand */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="bg-rose-50 text-rose-600 text-xs font-semibold px-3 py-1 rounded-full">
+                {product.category}
+              </span>
+              <span className="text-gray-400 text-xs uppercase tracking-wider font-medium">
+                {product.brand}
+              </span>
+            </div>
 
-            <p style={styles.category}>
-              Category: <strong>{product.category}</strong>
-            </p>
-
-            <p style={styles.brand}>
-              Brand: <strong>{product.brand}</strong>
-            </p>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 leading-tight">
+              {product.name}
+            </h1>
 
             {/* Rating */}
-            <p style={styles.rating}>
-              ⭐ {product.rating} / 5 ({product.numReviews} reviews)
-            </p>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-amber-400 text-lg">{renderStars(product.rating || 0)}</span>
+              <span className="text-gray-600 text-sm font-medium">
+                {product.rating?.toFixed(1) || "0.0"}
+              </span>
+              <span className="text-gray-400 text-sm">({product.numReviews || 0} reviews)</span>
+            </div>
 
             {/* Price */}
-            <p style={styles.price}>₹{product.price}</p>
+            <div className="mb-4">
+              <span className="text-4xl font-bold text-rose-600">
+                ₹{product.price?.toLocaleString("en-IN")}
+              </span>
+            </div>
 
-            {/* Stock */}
-            <p style={{
-              color: product.stock > 0 ? "green" : "red",
-              fontWeight: "600",
-              marginBottom: "15px",
-            }}>
-              {product.stock > 0
-                ? `✅ In Stock (${product.stock} available)`
-                : "❌ Out of Stock"}
-            </p>
+            {/* Stock Status */}
+            <div className="mb-5">
+              {product.stock > 10 ? (
+                <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-sm font-semibold px-3 py-1.5 rounded-lg">
+                  ✅ In Stock ({product.stock} available)
+                </span>
+              ) : product.stock > 0 ? (
+                <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 text-sm font-semibold px-3 py-1.5 rounded-lg">
+                  ⚡ Only {product.stock} left!
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-sm font-semibold px-3 py-1.5 rounded-lg">
+                  ❌ Out of Stock
+                </span>
+              )}
+            </div>
 
             {/* Description */}
-            <p style={styles.description}>{product.description}</p>
+            <p className="text-gray-600 leading-relaxed mb-6 text-sm">
+              {product.description}
+            </p>
 
             {/* Quantity Selector */}
             {product.stock > 0 && (
-              <div style={styles.qtyRow}>
-                <span style={{ fontWeight: "600" }}>Quantity:</span>
-                <div style={styles.qtyControls}>
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-gray-700 font-semibold text-sm">Qty:</span>
+                <div className="flex items-center gap-2 border-2 border-rose-200 rounded-xl px-3 py-1.5">
                   <button
-                    style={styles.qtyBtn}
                     onClick={() => setQty((q) => Math.max(1, q - 1))}
+                    className="text-rose-500 font-bold text-xl w-7 h-7 flex items-center justify-center hover:bg-rose-50 rounded-lg border-none bg-transparent cursor-pointer"
                   >
                     −
                   </button>
-                  <span style={styles.qtyNum}>{qty}</span>
+                  <span className="text-gray-800 font-bold text-lg min-w-8 text-center">{qty}</span>
                   <button
-                    style={styles.qtyBtn}
-                    onClick={() =>
-                      setQty((q) => Math.min(product.stock, q + 1))
-                    }
+                    onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
+                    className="text-rose-500 font-bold text-xl w-7 h-7 flex items-center justify-center hover:bg-rose-50 rounded-lg border-none bg-transparent cursor-pointer"
                   >
                     +
                   </button>
                 </div>
+                <span className="text-gray-500 text-sm">
+                  Total: <strong className="text-rose-600">₹{(product.price * qty).toLocaleString("en-IN")}</strong>
+                </span>
               </div>
             )}
 
             {/* Action Buttons */}
-            <div style={styles.btnRow}>
+            <div className="flex gap-3 flex-wrap">
               <button
-                style={{
-                  ...styles.addCartBtn,
-                  background: added ? "#00cc66" : "#e94560",
-                  opacity: product.stock === 0 ? 0.5 : 1,
-                }}
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
+                className={`flex-1 min-w-32 py-3.5 rounded-xl font-semibold text-sm text-white border-none cursor-pointer transition-all ${
+                  added
+                    ? "bg-green-500"
+                    : product.stock === 0
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-rose-600 hover:bg-rose-700"
+                }`}
               >
                 {added ? "✅ Added to Cart!" : "🛒 Add to Cart"}
               </button>
 
               <button
-                style={styles.buyNowBtn}
                 onClick={() => {
                   handleAddToCart();
                   navigate("/cart");
                 }}
                 disabled={product.stock === 0}
+                className="flex-1 min-w-32 py-3.5 rounded-xl font-semibold text-sm text-white bg-amber-500 hover:bg-amber-600 disabled:bg-gray-300 disabled:cursor-not-allowed border-none cursor-pointer transition-all"
               >
                 ⚡ Buy Now
               </button>
             </div>
+
+            {/* Delivery Info */}
+            <div className="mt-6 pt-5 border-t border-gray-100 grid grid-cols-3 gap-4 text-center">
+              <div className="text-xs text-gray-500">
+                <div className="text-lg mb-1">🚚</div>
+                <div className="font-medium text-gray-700">Free Delivery</div>
+                <div>on orders over ₹500</div>
+              </div>
+              <div className="text-xs text-gray-500">
+                <div className="text-lg mb-1">🔄</div>
+                <div className="font-medium text-gray-700">Easy Returns</div>
+                <div>7 day return policy</div>
+              </div>
+              <div className="text-xs text-gray-500">
+                <div className="text-lg mb-1">🔒</div>
+                <div className="font-medium text-gray-700">Secure Pay</div>
+                <div>100% safe checkout</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 text-center py-8 mt-12">
+        <p className="text-lg font-bold text-white mb-1">🛒 cholaKart</p>
+        <p className="text-sm">Built with ❤️ using MongoDB + Express + React + Node.js</p>
+      </footer>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: "1100px",
-    margin: "0 auto",
-    padding: "30px 20px",
-  },
-  backBtn: {
-    background: "none",
-    border: "none",
-    fontSize: "1rem",
-    cursor: "pointer",
-    color: "#e94560",
-    marginBottom: "20px",
-    fontWeight: "600",
-  },
-  productBox: {
-    display: "flex",
-    gap: "40px",
-    background: "white",
-    borderRadius: "15px",
-    padding: "30px",
-    boxShadow: "0 5px 20px rgba(0,0,0,0.08)",
-    flexWrap: "wrap",
-  },
-  imageBox: {
-    flex: 1,
-    minWidth: "280px",
-  },
-  image: {
-    width: "100%",
-    borderRadius: "10px",
-    objectFit: "cover",
-    maxHeight: "400px",
-  },
-  details: {
-    flex: 1,
-    minWidth: "280px",
-  },
-  productName: {
-    fontSize: "1.8rem",
-    color: "#333",
-    marginBottom: "10px",
-  },
-  category: {
-    color: "#666",
-    marginBottom: "5px",
-  },
-  brand: {
-    color: "#666",
-    marginBottom: "5px",
-  },
-  rating: {
-    color: "#ff9800",
-    marginBottom: "10px",
-  },
-  price: {
-    fontSize: "2rem",
-    fontWeight: "bold",
-    color: "#e94560",
-    marginBottom: "10px",
-  },
-  description: {
-    color: "#555",
-    lineHeight: "1.7",
-    marginBottom: "20px",
-  },
-  qtyRow: {
-    display: "flex",
-    alignItems: "center",
-    gap: "15px",
-    marginBottom: "20px",
-  },
-  qtyControls: {
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    border: "2px solid #e94560",
-    borderRadius: "8px",
-    padding: "4px 8px",
-  },
-  qtyBtn: {
-    background: "none",
-    border: "none",
-    fontSize: "1.3rem",
-    cursor: "pointer",
-    color: "#e94560",
-    fontWeight: "bold",
-    padding: "0 5px",
-  },
-  qtyNum: {
-    fontSize: "1.1rem",
-    fontWeight: "bold",
-    minWidth: "30px",
-    textAlign: "center",
-  },
-  btnRow: {
-    display: "flex",
-    gap: "15px",
-    flexWrap: "wrap",
-  },
-  addCartBtn: {
-    flex: 1,
-    padding: "14px",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: "600",
-    transition: "background 0.3s",
-  },
-  buyNowBtn: {
-    flex: 1,
-    padding: "14px",
-    background: "#ff9800",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: "600",
-  },
 };
 
 export default ProductDetailPage;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import axiosInstance from "../api/axiosInstance";
@@ -12,7 +12,6 @@ const MyOrdersPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -33,7 +32,6 @@ const MyOrdersPage = () => {
     fetchOrders();
   }, [user, navigate]);
 
-  // Format date
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("en-IN", {
       day: "numeric",
@@ -42,45 +40,47 @@ const MyOrdersPage = () => {
     });
   };
 
-  // Status color
-  const getStatusColor = (status) => {
+  const getStatusConfig = (status) => {
     switch (status) {
-      case "Processing": return { bg: "#fff3e0", color: "#ff9800" };
-      case "Shipped": return { bg: "#e3f2fd", color: "#2196f3" };
-      case "Delivered": return { bg: "#e8f5e9", color: "#4caf50" };
-      case "Cancelled": return { bg: "#ffebee", color: "#f44336" };
-      default: return { bg: "#f5f5f5", color: "#888" };
+      case "Processing": return { bg: "bg-amber-50", text: "text-amber-700", border: "border-amber-200", icon: "🔄" };
+      case "Shipped": return { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200", icon: "🚚" };
+      case "Delivered": return { bg: "bg-green-50", text: "text-green-700", border: "border-green-200", icon: "✅" };
+      case "Cancelled": return { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", icon: "❌" };
+      default: return { bg: "bg-gray-50", text: "text-gray-600", border: "border-gray-200", icon: "📦" };
     }
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f5f5" }}>
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div style={styles.container}>
-        <h2 style={styles.title}>📦 My Orders</h2>
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6">📦 My Orders</h2>
 
+        {/* Loading */}
         {loading && (
-          <p style={{ textAlign: "center", padding: "40px" }}>
-            Loading orders...
-          </p>
+          <div className="flex flex-col items-center justify-center py-24">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-rose-500 border-t-transparent mb-4" />
+            <p className="text-gray-400 font-medium">Loading orders...</p>
+          </div>
         )}
 
+        {/* Error */}
         {error && (
-          <p style={{ color: "red", textAlign: "center" }}>{error}</p>
+          <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-4 rounded-xl text-center">
+            ⚠️ {error}
+          </div>
         )}
 
-        {/* Empty Orders */}
-        {!loading && orders.length === 0 && (
-          <div style={styles.emptyBox}>
-            <p style={{ fontSize: "3rem" }}>📦</p>
-            <h3>No orders yet!</h3>
-            <p style={{ color: "#888", marginBottom: "20px" }}>
-              Start shopping to see your orders here
-            </p>
+        {/* Empty State */}
+        {!loading && !error && orders.length === 0 && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 text-center py-24 px-6">
+            <p className="text-6xl mb-4">📦</p>
+            <h3 className="text-xl font-bold text-gray-700 mb-2">No orders yet!</h3>
+            <p className="text-gray-400 mb-8">Start shopping to see your orders here</p>
             <button
-              style={styles.shopBtn}
               onClick={() => navigate("/")}
+              className="bg-rose-600 hover:bg-rose-700 text-white font-semibold px-8 py-3 rounded-xl transition-all border-none cursor-pointer"
             >
               Start Shopping
             </button>
@@ -89,93 +89,78 @@ const MyOrdersPage = () => {
 
         {/* Orders List */}
         {!loading && orders.length > 0 && (
-          <div style={styles.ordersList}>
+          <div className="space-y-5">
             {orders.map((order) => {
-              const statusStyle = getStatusColor(order.status);
+              const sc = getStatusConfig(order.status);
               return (
-                <div key={order._id} style={styles.orderCard}>
+                <div key={order._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                   {/* Order Header */}
-                  <div style={styles.orderHeader}>
+                  <div className="flex items-start justify-between flex-wrap gap-3 pb-4 mb-4 border-b border-gray-100">
                     <div>
-                      <p style={styles.orderId}>
-                        Order ID: #{order._id.slice(-8).toUpperCase()}
+                      <p className="font-bold text-gray-800 text-sm">
+                        Order #{order._id.slice(-8).toUpperCase()}
                       </p>
-                      <p style={styles.orderDate}>
-                        Placed on: {formatDate(order.createdAt)}
+                      <p className="text-gray-400 text-xs mt-0.5">
+                        Placed on {formatDate(order.createdAt)}
                       </p>
                     </div>
-                    <div style={styles.headerRight}>
-                      {/* Status Badge */}
-                      <span style={{
-                        ...styles.statusBadge,
-                        background: statusStyle.bg,
-                        color: statusStyle.color,
-                      }}>
-                        {order.status === "Processing" && "🔄 "}
-                        {order.status === "Shipped" && "🚚 "}
-                        {order.status === "Delivered" && "✅ "}
-                        {order.status === "Cancelled" && "❌ "}
-                        {order.status}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${sc.bg} ${sc.text} ${sc.border}`}>
+                        {sc.icon} {order.status}
                       </span>
-
-                      {/* Payment Method */}
-                      <span style={styles.paymentBadge}>
+                      <span className="bg-gray-100 text-gray-600 text-xs font-medium px-3 py-1.5 rounded-full border border-gray-200">
                         💳 {order.paymentMethod}
                       </span>
                     </div>
                   </div>
 
                   {/* Shipping Address */}
-                  <div style={styles.shippingInfo}>
-                    <p style={{ fontWeight: "600", marginBottom: "3px" }}>
-                      📦 Shipping to:
-                    </p>
-                    <p style={{ color: "#666", fontSize: "0.9rem" }}>
-                      {order.shippingAddress.address},{" "}
-                      {order.shippingAddress.city},{" "}
-                      {order.shippingAddress.state} -{" "}
-                      {order.shippingAddress.pinCode}
+                  <div className="bg-gray-50 rounded-xl p-4 mb-4 text-sm">
+                    <p className="font-semibold text-gray-700 mb-1">📍 Shipping to:</p>
+                    <p className="text-gray-500">
+                      {order.shippingAddress.address}, {order.shippingAddress.city},{" "}
+                      {order.shippingAddress.state} – {order.shippingAddress.pinCode}
                     </p>
                   </div>
 
                   {/* Order Items */}
-                  <div style={styles.itemsSection}>
-                    <p style={styles.itemsTitle}>Items Ordered:</p>
-                    {order.orderItems.map((item, index) => (
-                      <div key={index} style={styles.orderItem}>
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          style={styles.itemImage}
-                        />
-                        <div style={styles.itemDetails}>
-                          <p style={styles.itemName}>{item.name}</p>
-                          <p style={{ color: "#888", fontSize: "0.85rem" }}>
-                            Qty: {item.qty} × ₹{item.price}
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                      Items Ordered
+                    </p>
+                    <div className="space-y-3">
+                      {order.orderItems.map((item, index) => (
+                        <div key={index} className="flex items-center gap-3">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-14 h-14 object-cover rounded-xl flex-shrink-0 border border-gray-100"
+                            onError={(e) => { e.target.src = "https://via.placeholder.com/56?text=Img"; }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-800 truncate">{item.name}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">
+                              {item.qty} × ₹{item.price?.toLocaleString("en-IN")}
+                            </p>
+                          </div>
+                          <p className="text-sm font-bold text-gray-800 flex-shrink-0">
+                            ₹{(item.qty * item.price).toLocaleString("en-IN")}
                           </p>
                         </div>
-                        <p style={styles.itemTotal}>
-                          ₹{(item.qty * item.price).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
 
                   {/* Order Footer */}
-                  <div style={styles.orderFooter}>
-                    <div style={styles.priceBreakdown}>
-                      <span style={{ color: "#888", fontSize: "0.85rem" }}>
-                        Items: ₹{order.itemsPrice} + Tax: ₹
-                        {order.taxPrice} + Shipping: ₹
-                        {order.shippingPrice === 0
-                          ? "FREE"
-                          : order.shippingPrice}
-                      </span>
-                    </div>
-                    <div style={styles.totalBox}>
-                      <span style={styles.totalLabel}>Order Total:</span>
-                      <span style={styles.totalAmount}>
-                        ₹{order.totalPrice}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-100 flex-wrap gap-2">
+                    <p className="text-xs text-gray-400">
+                      Items ₹{order.itemsPrice} + Tax ₹{order.taxPrice} + Shipping{" "}
+                      {order.shippingPrice === 0 ? "FREE" : `₹${order.shippingPrice}`}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600 font-medium">Total:</span>
+                      <span className="text-lg font-bold text-rose-600">
+                        ₹{order.totalPrice?.toLocaleString("en-IN")}
                       </span>
                     </div>
                   </div>
@@ -185,156 +170,14 @@ const MyOrdersPage = () => {
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <footer className="bg-gray-900 text-gray-400 text-center py-8 mt-12">
+        <p className="text-lg font-bold text-white mb-1">🛒 cholaKart</p>
+        <p className="text-sm">Built with ❤️ using MongoDB + Express + React + Node.js</p>
+      </footer>
     </div>
   );
-};
-
-const styles = {
-  container: {
-    maxWidth: "900px",
-    margin: "0 auto",
-    padding: "30px 20px",
-  },
-  title: {
-    fontSize: "1.8rem",
-    color: "#333",
-    marginBottom: "25px",
-  },
-  emptyBox: {
-    textAlign: "center",
-    padding: "80px 20px",
-    background: "white",
-    borderRadius: "15px",
-    boxShadow: "0 3px 15px rgba(0,0,0,0.08)",
-  },
-  shopBtn: {
-    padding: "12px 30px",
-    background: "#e94560",
-    color: "white",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    fontSize: "1rem",
-    fontWeight: "600",
-  },
-  ordersList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "20px",
-  },
-  orderCard: {
-    background: "white",
-    borderRadius: "15px",
-    padding: "25px",
-    boxShadow: "0 3px 15px rgba(0,0,0,0.08)",
-  },
-  orderHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: "15px",
-    paddingBottom: "15px",
-    borderBottom: "1px solid #f0f0f0",
-    flexWrap: "wrap",
-    gap: "10px",
-  },
-  orderId: {
-    fontWeight: "bold",
-    color: "#333",
-    fontSize: "0.95rem",
-    marginBottom: "4px",
-  },
-  orderDate: {
-    color: "#888",
-    fontSize: "0.85rem",
-  },
-  headerRight: {
-    display: "flex",
-    gap: "10px",
-    alignItems: "center",
-    flexWrap: "wrap",
-  },
-  statusBadge: {
-    padding: "6px 14px",
-    borderRadius: "20px",
-    fontWeight: "600",
-    fontSize: "0.85rem",
-  },
-  paymentBadge: {
-    background: "#f0f0f0",
-    color: "#555",
-    padding: "6px 14px",
-    borderRadius: "20px",
-    fontSize: "0.82rem",
-  },
-  shippingInfo: {
-    background: "#f9f9f9",
-    borderRadius: "8px",
-    padding: "12px",
-    marginBottom: "15px",
-  },
-  itemsSection: {
-    marginBottom: "15px",
-  },
-  itemsTitle: {
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: "10px",
-    fontSize: "0.9rem",
-  },
-  orderItem: {
-    display: "flex",
-    gap: "12px",
-    alignItems: "center",
-    padding: "10px 0",
-    borderBottom: "1px solid #f5f5f5",
-  },
-  itemImage: {
-    width: "55px",
-    height: "55px",
-    objectFit: "cover",
-    borderRadius: "6px",
-    flexShrink: 0,
-  },
-  itemDetails: {
-    flex: 1,
-  },
-  itemName: {
-    fontSize: "0.9rem",
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: "3px",
-  },
-  itemTotal: {
-    fontWeight: "600",
-    color: "#333",
-    fontSize: "0.95rem",
-  },
-  orderFooter: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingTop: "15px",
-    flexWrap: "wrap",
-    gap: "10px",
-  },
-  priceBreakdown: {
-    flex: 1,
-  },
-  totalBox: {
-    display: "flex",
-    gap: "10px",
-    alignItems: "center",
-  },
-  totalLabel: {
-    fontWeight: "600",
-    color: "#333",
-  },
-  totalAmount: {
-    fontSize: "1.3rem",
-    fontWeight: "bold",
-    color: "#e94560",
-  },
 };
 
 export default MyOrdersPage;
